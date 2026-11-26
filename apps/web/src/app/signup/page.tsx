@@ -4,14 +4,18 @@ import { Flash } from '@/components/Flash';
 import { AuthShell } from '@/components/AuthShell';
 import { Icon } from '@/components/Icon';
 import { AuthForm } from '@/components/AuthForm';
+import { SocialSignIn } from '@/components/SocialSignIn';
+import { api, query } from '@/lib/convex';
 
 export const metadata = { title: t('auth.signUpTitle') };
 type SP = { error?: string; fullName?: string; username?: string; email?: string; ageBand?: string };
 
-export default function SignUp({ searchParams: s }: { searchParams: SP }) {
+export default async function SignUp({ searchParams: s }: { searchParams: SP }) {
+  const social = await query(api.users.signInOptions, {}).catch(() => ({ google: false, facebook: false }));
   return (
     <AuthShell title={t('auth.signUpTitle')} subtitle="Free forever. Takes under a minute." wide>
       <Flash error={s.error} />
+      <div className="mb-4"><SocialSignIn google={social.google} facebook={social.facebook} /></div>
       <AuthForm kind="signUp" className="grid gap-4 sm:grid-cols-2">
         <div><label className="label" htmlFor="fullName">{t('auth.fullName')}</label>
           <div className="input-icon"><Icon name="user" />

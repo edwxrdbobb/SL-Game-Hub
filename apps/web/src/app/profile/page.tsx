@@ -6,6 +6,7 @@ import { updateProfile } from '../actions';
 import { Flash } from '@/components/Flash';
 import { Icon } from '@/components/Icon';
 import { EmailSettings } from '@/components/EmailSettings';
+import { ConvexIsland } from '@/components/ConvexIsland';
 
 export const metadata = { title: t('profile.title') };
 
@@ -54,7 +55,7 @@ export default async function Profile({ searchParams }: { searchParams: { error?
         <button className="btn btn-primary btn-lg w-full"><Icon name="check" />{t('profile.save')}</button>
       </form>
 
-      <EmailSettings email={me.email} reminders={me.email_reminders} />
+      <ConvexIsland><EmailSettings email={me.email} reminders={me.email_reminders} /></ConvexIsland>
 
       <section className="card reveal p-5" style={{ ['--i' as string]: 3 }}><h2 className="mb-3 flex items-center gap-2"><span className="icon-badge icon-badge-blue h-9 w-9"><Icon name="chart" size={18} /></span>{t('profile.stats')}</h2>
         {!stats?.length ? <p className="text-muted">{t('profile.noStats')}</p> : (

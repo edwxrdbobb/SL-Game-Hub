@@ -11,6 +11,7 @@ export const getMe = cache(async (): Promise<Me | null> => query(api.users.me, {
 export async function requireUser() {
   const me = await getMe();
   if (!me) redirect('/login');
+  if (me.profile_pending) redirect('/welcome'); // Google/Facebook sign-up not finished yet
   return me;
 }
 export async function requireAdmin() {

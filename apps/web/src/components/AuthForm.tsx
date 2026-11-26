@@ -2,7 +2,7 @@
 
 import { useRef, type FormEvent, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { isEmail, validatePasswords, validateSignUp } from '@slgh/shared/src/validation';
+import { USERNAME_RE, isEmail, validatePasswords, validateSignUp } from '@slgh/shared/src/validation';
 import { signInWithPassword } from '@/lib/auth-client';
 
 type Kind = 'signIn' | 'signUp' | 'requestReset' | 'resetPassword';
@@ -17,9 +17,12 @@ async function submit(kind: Kind, fd: FormData): Promise<string> {
   const email = str(fd, 'email').trim().toLowerCase();
   switch (kind) {
     case 'signIn': {
+      // One box takes a username or an email; the server swaps a username for its account's email.
+      const login = str(fd, 'login').trim();
+      const id = isEmail(login.toLowerCase()) ? login.toLowerCase() : login;
       const password = str(fd, 'password');
-      if (!isEmail(email) || !password) fail('errors.invalidCredentials');
-      await signInWithPassword({ flow: 'signIn', email, password });
+      if (!(isEmail(id) || USERNAME_RE.test(id)) || !password) fail('errors.invalidCredentials');
+      await signInWithPassword({ flow: 'signIn', email: id, password });
       return safeNext(str(fd, 'next'));
     }
     case 'signUp': {
@@ -66,7 +69,7 @@ export function AuthForm({ kind, className, children }: { kind: Kind; className?
       router.refresh(); // re-render the header with the signed-in player
     } catch (err) {
       // Re-fill non-secret fields on error (saves retyping on slow phones). Never includes passwords.
-      const keep = Object.fromEntries(['fullName', 'username', 'email', 'ageBand', 'next']
+      const keep = Object.fromEntries(['fullName', 'username', 'email', 'login', 'ageBand', 'next']
         .filter((k) => fd.get(k)).map((k) => [k, str(fd, k)]));
       router.replace(`${pathname}?${qs({ ...keep, error: (err as Error).message })}`);
     } finally {

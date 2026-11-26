@@ -19,4 +19,14 @@ async function call(action: 'auth:signIn' | 'auth:signOut', args: Record<string,
 }
 
 export const signInWithPassword = (params: Params) => call('auth:signIn', { provider: 'password', params });
+
+/**
+ * Google/Facebook: /api/auth answers with the provider's sign-in page (and keeps a verifier cookie);
+ * the provider sends the player back to `redirectTo?code=...`, which our middleware exchanges for a session.
+ */
+export async function signInWithProvider(provider: 'google' | 'facebook', redirectTo: string) {
+  const { redirect } = (await call('auth:signIn', { provider, params: { redirectTo } })) as { redirect?: string };
+  if (!redirect) throw new Error('errors.socialFailed');
+  window.location.assign(redirect);
+}
 export const signOut = () => call('auth:signOut', {});

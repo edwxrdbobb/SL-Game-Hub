@@ -51,6 +51,9 @@ export default defineSchema({
     // Emails (convex/emails.ts). false = no reminder or invite emails; account and money emails always go.
     email_reminders: v.optional(v.boolean()),
     pro_reminder_for: v.optional(v.number()), // the pro_until we last sent "your Pro ends soon" for
+    // Signed up with Google/Facebook and hasn't chosen a username and age band yet (/welcome).
+    // Until then the account has the most limited settings (under_13, private profile).
+    profile_pending: v.optional(v.boolean()),
   })
     .index('email', ['email'])
     .index('by_username_lower', ['username_lower'])

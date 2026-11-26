@@ -32,6 +32,20 @@ export async function updateProfile(fd: FormData) {
   redirect(`/profile?${qs({ notice: 'notice.profileSaved' })}`);
 }
 
+/** /welcome: a Google/Facebook player picks their username and age range (once). */
+export async function completeProfile(fd: FormData) {
+  const raw = str(fd, 'next');
+  const next = raw.startsWith('/') && !raw.startsWith('//') && !raw.includes('\\') ? raw : '/';
+  const error = await attempt(() => mutate(api.users.completeProfile, {
+    full_name: str(fd, 'fullName'), username: str(fd, 'username'), age_band: str(fd, 'ageBand'),
+  }));
+  if (error) {
+    redirect(`/welcome?${qs({ error, next, fullName: str(fd, 'fullName'), username: str(fd, 'username'), ageBand: str(fd, 'ageBand') })}`);
+  }
+  revalidatePath('/', 'layout');
+  redirect(next);
+}
+
 // ---------- Admin (every action re-checks the role; the Convex function is the second lock) ----------
 export async function setGameStatus(fd: FormData) {
   await requireAdmin();
